@@ -31,9 +31,24 @@ async function fetchOrderDetails() {
   try {
     const user = await getUser(1);
     const posts = await getPosts(user.id);
-    const comments = await getComments(posts[0].id);
+    // Obtener comentarios de todos los posts del usuario
+    const commentsPromises = posts.map(post => getComments(post.id));
+    const commentsArray = await Promise.all(commentsPromises);
 
-    console.log("Comentarios del primer post:", comments);
+    // Unir todos los comentarios en un solo array
+    const allComments = commentsArray.flat();
+
+    
+    // Filter es para filtrar comentarios que contengan la palabra 'qui'
+    const filteredComments = allComments.filter(comment => comment.body.includes('qui'));
+
+    // Map para obtener solo los cuerpos de los comentarios
+    const commentBodies = filteredComments.map(comment => comment.body);
+
+    // Reducir los cuerpos de los comentarios a una sola cadena de texto
+    const concatenatedComments = commentBodies.reduce((acc, body) => acc + ' ' + body, '');
+
+    console.log("Comentarios concatenados:", concatenatedComments);
     console.log("Fin");
   } catch (error) {
     console.error("Error:", error);
